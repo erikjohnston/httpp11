@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 include(ExternalProject)
 
 ExternalProject_Add (
@@ -28,7 +30,11 @@ add_dependencies(http-parser http-parser-proj)
 set(HTTP_PARSER_INCLUDE_DIR ${install_dir}/include)
 include_directories(${HTTP_PARSER_INCLUDE_DIR})
 
-add_executable(myapp src/main.cpp)
-target_link_libraries(myapp http-parser)
+include_directories(include/)
+add_library(httpp11 src/httpp11.cpp src/http_response_parser.cpp)
+target_link_libraries(httpp11 http-parser)
 
-include_directories(${HTTP_PARSER_INCLUDE_DIR} includes/)
+add_executable(myapp src/main.cpp)
+target_link_libraries(myapp httpp11)
+
+include_directories(${HTTP_PARSER_INCLUDE_DIR})
