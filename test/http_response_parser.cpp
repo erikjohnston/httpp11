@@ -43,6 +43,11 @@ TEST_CASE("HTTP Response Parser", "[http]") {
         REQUIRE(to_str(length->second) == "5");
 
         REQUIRE(response.headers.count("Content-Type") == 1);
+
+        auto type = response.headers.find("Content-Type");
+        REQUIRE(type != response.headers.end());
+        REQUIRE(to_str(type->second) == "text/plain");
+
         REQUIRE(response.headers.size() == 2);
     };
 }
