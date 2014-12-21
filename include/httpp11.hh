@@ -90,4 +90,7 @@ namespace httpp11 {
 
     bool http_body_is_final(http_parser const& parser);
 
+    std::string http_method_str(http_parser const& parser);
+    std::string http_method_str(enum http_method m);
+
 } // httpp11

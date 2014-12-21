@@ -131,3 +131,11 @@ void httpp11::http_parser_settings::cleanup_callbacks(httpp11::http_parser & par
 httpp11::http_error::~http_error() {}
 httpp11::http_error::http_error(std::error_condition const& c) : std::runtime_error(c.message()), cond(c) {}
 std::error_condition const& httpp11::http_error::condition() const { return cond; }
+
+std::string httpp11::http_method_str(http_parser const& parser) {
+    return httpp11::http_method_str(static_cast<http_method>(parser.Get().method));
+}
+
+std::string httpp11::http_method_str(enum http_method m) {
+    return std::string(::http_method_str(m));
+}

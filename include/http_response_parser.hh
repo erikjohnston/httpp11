@@ -42,15 +42,25 @@ struct HttpVersion : public std::tuple<std::uint8_t, std::uint8_t> {
 };
 
 
-struct HttpResponse {
-    std::uint16_t status;
-    std::vector<char> reason_phrase;
+struct HttpMessage {
     HttpVersion version;
 
     HttpHeaders headers;
 
     std::vector<char> body;
 };
+
+
+struct HttpResponse : public HttpMessage {
+    std::uint16_t status;
+    std::vector<char> reason_phrase;
+};
+
+struct HttpRequest : public HttpMessage {
+    std::string method;
+    std::vector<char> url;
+};
+
 
 
 class HttpParser {
@@ -89,6 +99,7 @@ protected:
     HttpHeaders headers;
 };
 
+
 class HttpResponseParser : public HttpParser {
 public:
     HttpResponseParser();
@@ -102,4 +113,20 @@ public:
     std::function<void(HttpResponse&&)> callback;
 protected:
     std::vector<char> reason_phrase;
+};
+
+
+class HttpRequestParser : public HttpParser {
+public:
+    HttpRequestParser();
+    virtual ~HttpRequestParser();
+
+    virtual bool on_message_begin(httpp11::http_parser&);
+    virtual bool on_url(httpp11::http_parser&, std::vector<char>);
+
+    virtual bool on_message_complete(httpp11::http_parser&);
+
+    std::function<void(HttpRequest&&)> callback;
+protected:
+    std::vector<char> url;
 };

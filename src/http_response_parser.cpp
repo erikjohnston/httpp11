@@ -115,13 +115,12 @@ bool HttpResponseParser::on_status(httpp11::http_parser&, std::vector<char> data
 }
 
 bool HttpResponseParser::on_message_complete(httpp11::http_parser& p) {
-    HttpResponse response{
-        static_cast<std::uint16_t>(p.Get().status_code), // We know this is fine from http_parser.h
-        reason_phrase,
-        HttpVersion(p.Get().http_major, p.Get().http_minor),
-        std::move(headers),
-        std::move(body)
-    };
+    HttpResponse response;
+    response.status = static_cast<std::uint16_t>(p.Get().status_code); // We know this is fine from http_parser.h
+    response.reason_phrase = reason_phrase;
+    response.version = HttpVersion(p.Get().http_major, p.Get().http_minor);
+    response.headers = std::move(headers);
+    response.body = std::move(body);
 
     // TODO
     callback(std::move(response));
@@ -129,4 +128,30 @@ bool HttpResponseParser::on_message_complete(httpp11::http_parser& p) {
     return 0;
 }
 
+HttpRequestParser::HttpRequestParser() : HttpParser(httpp11::http_parser_type::http_request) {}
+HttpRequestParser::~HttpRequestParser() {}
 
+bool HttpRequestParser::on_message_begin(httpp11::http_parser& p) {
+    url.clear();
+
+    return HttpParser::on_message_begin(p);
+}
+
+bool HttpRequestParser::on_url(httpp11::http_parser&, std::vector<char> data) {
+    std::copy(data.begin(), data.end(), std::back_inserter(url));
+    return 0;
+}
+
+bool HttpRequestParser::on_message_complete(httpp11::http_parser& p) {
+    HttpRequest request;
+    request.method = httpp11::http_method_str(p);
+    request.url = url;
+    request.version = HttpVersion(p.Get().http_major, p.Get().http_minor);
+    request.headers = std::move(headers);
+    request.body = std::move(body);
+
+    // TODO
+    callback(std::move(request));
+
+    return 0;
+}
