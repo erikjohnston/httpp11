@@ -56,8 +56,8 @@ namespace httpp11 {
     };
 
     struct HttpContext {
-        HttpContext(httpp11::http_parser &parser, httpp11::http_parser_settings &settings)
-                : parser(parser), settings(settings) {
+        HttpContext(httpp11::http_parser &p, httpp11::http_parser_settings &s)
+                : parser(p), settings(s) {
         }
 
         httpp11::http_parser &parser;
@@ -66,11 +66,14 @@ namespace httpp11 {
 
     class http_error : public std::runtime_error {
     public:
-        http_error(std::error_condition const& c) : std::runtime_error(c.message()), c(c) {}
-        std::error_condition condition() const { return c; }
+        http_error(http_error const&) = default;
+        virtual ~http_error();
+
+        http_error(std::error_condition const&);
+        std::error_condition const& condition() const;
 
     private:
-        std::error_condition c;
+        std::error_condition cond;
     };
 
     using unique_http_parser_settings = std::unique_ptr<http_parser_settings>;
@@ -79,7 +82,7 @@ namespace httpp11 {
     // library functions
     unique_http_parser http_parser_init(http_parser_type);
 
-    void http_parser_execute(http_parser&, http_parser_settings&, std::vector<char> const&) throw(http_error);
+    void http_parser_execute(http_parser&, http_parser_settings&, std::vector<char> const&);
 
     bool http_should_keep_alive(http_parser const& parser);
 

@@ -5,14 +5,14 @@
 
 #include <functional>
 
-httpp11::http_data_cb bind_data_fn(
+static httpp11::http_data_cb bind_data_fn(
     HttpResponseParser* p,
     bool(HttpResponseParser::* fn)(httpp11::http_parser&, std::vector<char>)
 ) {
     return std::bind(std::mem_fn(fn), p, std::placeholders::_1, std::placeholders::_2);
 }
 
-httpp11::http_cb bind_fn(
+static httpp11::http_cb bind_fn(
         HttpResponseParser* p,
         bool(HttpResponseParser::* fn)(httpp11::http_parser&)
 ) {
@@ -23,6 +23,7 @@ HttpResponseParser::HttpResponseParser()
 : parser(httpp11::http_parser_init(httpp11::http_parser_type::http_response)), settings(httpp11::http_parser_settings_init())
 {
     // Safe to capture `this` as settings' lifespan is tied to `this`.
+    settings->message_begin = bind_fn(this, &HttpResponseParser::on_message_begin);
     settings->status = bind_data_fn(this, &HttpResponseParser::on_status);
     settings->header_field = bind_data_fn(this, &HttpResponseParser::on_h_field);
     settings->header_value = bind_data_fn(this, &HttpResponseParser::on_h_value);
@@ -39,7 +40,7 @@ Deferred<> HttpResponseParser::on_data(std::vector<char>&& data) {
     return Deferred<>::make_succeeded();
 }
 
-void HttpResponseParser::on_error(Error const& err, bool fatal) {
+void HttpResponseParser::on_error(Error const&, bool fatal) {
     // TODO
     if (fatal) {
         on_close();
@@ -52,6 +53,18 @@ void HttpResponseParser::on_close() {
     // Signal EOF to http11
     httpp11::http_parser_execute(*parser, *settings, std::vector<char>());
 }
+
+bool HttpResponseParser::on_message_begin(httpp11::http_parser&) {
+    headerState = HeaderState::FIELD;
+    body.clear();
+    status_line.clear();
+    header_field.clear();
+    header_value.clear();
+    headers.clear();
+
+    return 0;
+}
+
 
 bool HttpResponseParser::on_h_field(httpp11::http_parser&, std::vector<char> data) {
     if (headerState == HeaderState::FIELD) {
@@ -88,7 +101,7 @@ bool HttpResponseParser::on_status(httpp11::http_parser&, std::vector<char> data
     return 0;
 }
 
-bool HttpResponseParser::on_headers_complete(httpp11::http_parser& p) {
+bool HttpResponseParser::on_headers_complete(httpp11::http_parser&) {
     headers.insert({std::move(header_field), std::move(header_value)});
 
     headerState = HeaderState::FIELD;

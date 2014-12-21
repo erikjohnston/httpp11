@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 2.8)
 
 set(http-parser-version "v2.3")
 
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Weverything -Wpedantic -Wno-c++98-compat")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Weverything -Wno-c++98-compat -Wno-padded -Wno-exit-time-destructors -Wno-global-constructors")
 
 include(ExternalProject)
 
@@ -34,13 +35,13 @@ set(HTTP_PARSER_INCLUDE_DIR ${install_dir}/include)
 include_directories(${HTTP_PARSER_INCLUDE_DIR})
 
 include_directories(include/)
-add_library(httpp11 src/httpp11.cpp src/http_response_parser.cpp)
+add_library(httpp11 src/httpp11.cpp src/http_response_parser.cpp src/deferred.cpp)
 target_link_libraries(httpp11 http-parser)
 
 add_executable(myapp src/main.cpp)
 target_link_libraries(myapp httpp11)
 
-include_directories(${HTTP_PARSER_INCLUDE_DIR})
+include_directories(SYSTEM ${HTTP_PARSER_INCLUDE_DIR})
 
 add_subdirectory(test)
 

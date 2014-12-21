@@ -4,9 +4,9 @@
 #include <sstream>
 #include <system_error>
 
-class http_error_category_t : public std::error_category {
+class : public std::error_category {
 public:
-    const char* name() const noexcept { return "http_parser error."; };
+    const char* name() const noexcept { return "http_parser error."; }
 
     std::string message(int ev) const {
         std::string name = ::http_errno_name(http_errno(ev));
@@ -15,15 +15,15 @@ public:
         std::stringstream ss; ss << name << ": " << description;
         return ss.str();
     }
-} http_error_category;
+} static http_error_category;
 
-std::error_condition make_error_condition(enum http_errno err) {
+static std::error_condition make_error_condition(enum http_errno err) {
     return std::error_condition(err, http_error_category);
 }
 
-httpp11::http_error make_http_error(enum http_errno err) {
-    return httpp11::http_error(make_error_condition(err));
-}
+//static httpp11::http_error make_http_error(enum http_errno err) {
+//    return httpp11::http_error(make_error_condition(err));
+//}
 
 httpp11::unique_http_parser httpp11::http_parser_init(httpp11::http_parser_type type) {
     httpp11::unique_http_parser parser(new httpp11::http_parser());
@@ -34,7 +34,7 @@ httpp11::unique_http_parser httpp11::http_parser_init(httpp11::http_parser_type 
 }
 
 void httpp11::http_parser_execute(httpp11::http_parser& parser, httpp11::http_parser_settings& settings,
-        std::vector<char> const& data) throw(httpp11::http_error) {
+        std::vector<char> const& data) {
     settings.setup_callbacks(parser);
 
     auto nparsed = ::http_parser_execute(&parser.Get(), &settings.Get(), data.data(), data.size());
@@ -127,3 +127,7 @@ void httpp11::http_parser_settings::cleanup_callbacks(httpp11::http_parser & par
     Get().on_message_complete = nullptr;
 
 }
+
+httpp11::http_error::~http_error() {}
+httpp11::http_error::http_error(std::error_condition const& c) : std::runtime_error(c.message()), cond(c) {}
+std::error_condition const& httpp11::http_error::condition() const { return cond; }

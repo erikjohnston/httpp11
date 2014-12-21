@@ -24,19 +24,17 @@ namespace {
 
 class Error : public std::error_condition {
 public:
-    Error(int val, std::error_category const& cat) : std::error_condition(val, cat) {}
+    Error(int val, std::error_category const& cat);
 
-    Error(std::error_condition const& cond) : std::error_condition(cond) {}
+    Error(std::error_condition const& cond);
 
     Error(Error const&) = default;
     Error(Error &&) = default;
 
-    virtual std::string message() const { return std::error_condition::message(); }
+    virtual ~Error();
 
-    virtual std::exception const& throw_as_exception() const { return err; }
+    virtual std::string message() const;
 
-private:
-    std::runtime_error err = std::runtime_error(message());
 };
 
 /*
@@ -181,13 +179,13 @@ public:
     bool has_succeeded() const {
         if (!cbs) throw std::logic_error("cbs is not instansiated");
 
-        return (bool)cbs->values_ptr;
+        return static_cast<bool>(cbs->values_ptr);
     }
 
     bool has_erred() const {
         if (!cbs) throw std::logic_error("cbs is not instansiated");
 
-        return (bool)cbs->error_ptr;
+        return static_cast<bool>(cbs->error_ptr);
     }
 
     std::tuple<Args...> const& get_result() {
@@ -215,7 +213,7 @@ private:
     }
 
     template<int... S>
-    void call_success_from_store_impl(success_cb const& f, seq<S...> _) {
+    void call_success_from_store_impl(success_cb const& f, seq<S...>) {
         if (!cbs->values_ptr) throw std::logic_error("cbs->values_ptr is not instansiated");
         f(std::get<S>(*cbs->values_ptr) ...);
     }

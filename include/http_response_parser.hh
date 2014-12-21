@@ -58,12 +58,15 @@ class HttpResponseParser : public Sink<std::vector<char>> {
 public:
     HttpResponseParser();
 
+    virtual ~HttpResponseParser() {}
+
     // Callbacks from the TCP source.
     Deferred<> on_data(std::vector<char>&&);
     void on_error(Error const&, bool fatal);
     void on_close();
 
     // http11 callbacks
+    bool on_message_begin(httpp11::http_parser&);
     bool on_h_field(httpp11::http_parser&, std::vector<char>);
     bool on_h_value(httpp11::http_parser&, std::vector<char>);
     bool on_headers_complete(httpp11::http_parser&);
