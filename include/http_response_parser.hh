@@ -44,7 +44,7 @@ struct HttpVersion : public std::tuple<std::uint8_t, std::uint8_t> {
 
 struct HttpResponse {
     std::uint16_t status;
-    std::vector<char> status_line;
+    std::vector<char> reason_phrase;
     HttpVersion version;
 
     HttpHeaders headers;
@@ -53,11 +53,11 @@ struct HttpResponse {
 };
 
 
-class HttpResponseParser{
+class HttpResponseParser {
 public:
     HttpResponseParser();
 
-    virtual ~HttpResponseParser() {}
+    virtual ~HttpResponseParser();
 
     // Callbacks from the TCP source.
     void on_data(std::vector<char>&&);
@@ -79,7 +79,7 @@ private:
     httpp11::unique_http_parser_settings settings;
 
     std::vector<char> body;
-    std::vector<char> status_line;
+    std::vector<char> reason_phrase;
 
     enum class HeaderState {FIELD, VALUE};
     HeaderState headerState = HeaderState::FIELD;

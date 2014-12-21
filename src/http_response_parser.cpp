@@ -33,6 +33,8 @@ HttpResponseParser::HttpResponseParser()
 
 }
 
+HttpResponseParser::~HttpResponseParser() {}
+
 void HttpResponseParser::on_data(std::vector<char>&& data) {
     if (data.size() > 0) {
         httpp11::http_parser_execute(*parser, *settings, data);
@@ -50,7 +52,7 @@ void HttpResponseParser::on_close() {
 bool HttpResponseParser::on_message_begin(httpp11::http_parser&) {
     headerState = HeaderState::FIELD;
     body.clear();
-    status_line.clear();
+    reason_phrase.clear();
     header_field.clear();
     header_value.clear();
     headers.clear();
@@ -90,7 +92,7 @@ bool HttpResponseParser::on_body(httpp11::http_parser&, std::vector<char> data) 
 }
 
 bool HttpResponseParser::on_status(httpp11::http_parser&, std::vector<char> data) {
-    std::copy(data.begin(), data.end(), std::back_inserter(status_line));
+    std::copy(data.begin(), data.end(), std::back_inserter(reason_phrase));
     return 0;
 }
 
@@ -105,7 +107,7 @@ bool HttpResponseParser::on_headers_complete(httpp11::http_parser&) {
 bool HttpResponseParser::on_message_complete(httpp11::http_parser& p) {
     HttpResponse response{
         static_cast<std::uint16_t>(p.Get().status_code), // We know this is fine from http_parser.h
-        status_line,
+        reason_phrase,
         HttpVersion(p.Get().http_major, p.Get().http_minor),
         std::move(headers),
         std::move(body)
