@@ -1,16 +1,19 @@
 cmake_minimum_required(VERSION 2.8)
 
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(http-parser-version "v2.3")
+
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Weverything -Wpedantic -Wno-c++98-compat")
 
 include(ExternalProject)
 
 ExternalProject_Add (
     http-parser-proj
     GIT_REPOSITORY "git@github.com:joyent/http-parser.git"
-    GIT_TAG "master"
+    GIT_TAG ${http-parser-version}
 #    DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/download/http_parser
 #    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/externals/http_parser
 #    BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/build/http_parser
+    UPDATE_COMMAND ""
     INSTALL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/externals/http_parser
     BUILD_IN_SOURCE 1
 #    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/http-parser
@@ -38,3 +41,8 @@ add_executable(myapp src/main.cpp)
 target_link_libraries(myapp httpp11)
 
 include_directories(${HTTP_PARSER_INCLUDE_DIR})
+
+add_subdirectory(test)
+
+enable_testing ()
+add_test (NAME MyTest COMMAND Test)

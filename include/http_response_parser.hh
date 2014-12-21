@@ -33,7 +33,7 @@ using HttpHeaders = std::multimap<std::string, std::vector<char>, ci_less>;
 
 
 struct HttpVersion : public std::tuple<std::uint8_t, std::uint8_t> {
-    using tuple::tuple;
+    using std::tuple<std::uint8_t, std::uint8_t>::tuple;
 
     std::uint8_t const& major() const { return std::get<0>(*this); }
     std::uint8_t & major() { return std::get<0>(*this); }

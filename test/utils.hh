@@ -32,3 +32,17 @@ public:
         return r;
     }
 };
+
+
+template<typename T, typename F>
+struct ConvertContainer{
+    T operator()(F const& f) {
+        return T(std::begin(f), std::end(f));
+    }
+};
+
+extern ConvertContainer<std::vector<char>, std::string> to_vec;
+extern ConvertContainer<std::string, std::vector<char>> to_str;
+
+//using to_vector = convert_container<std::vector<char>, std::string>;
+//using to_string = convert_container<std::string, std::vector<char>>;

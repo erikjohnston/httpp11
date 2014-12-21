@@ -6,7 +6,6 @@
 
 namespace h = httpp11;
 
-std::vector<char> to_vector(std::string const& c) { return std::vector<char>(c.begin(), c.end()); }
 
 TEST_CASE("Test parsing GET response", "[http11]") {
     auto parser = h::http_parser_init(h::http_parser_type::http_response);
@@ -39,7 +38,7 @@ TEST_CASE("Test parsing GET response", "[http11]") {
     SECTION("Check one big chunk") {
         std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 5\r\n\r\nHello";
 
-        h::http_parser_execute(*parser, *settings, to_vector(response));
+        h::http_parser_execute(*parser, *settings, to_vec(response));
 
         REQUIRE(message_begin_cb.number_of_calls() == 1);
         REQUIRE(status_cb.number_of_calls() > 0);
@@ -79,7 +78,7 @@ TEST_CASE("Test parsing GET response", "[http11]") {
         };
 
         for (auto& entry : chunks) {
-            h::http_parser_execute(*parser, *settings, to_vector(entry.first));
+            h::http_parser_execute(*parser, *settings, to_vec(entry.first));
             entry.second();
         }
 

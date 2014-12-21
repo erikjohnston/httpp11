@@ -89,11 +89,11 @@ bool HttpResponseParser::on_status(httpp11::http_parser&, std::vector<char> data
 
 bool HttpResponseParser::on_message_complete(httpp11::http_parser& p) {
     HttpResponse response{
-            static_cast<std::uint16_t>(p.Get().status_code), // We know this is fine from http_parser.h
-            status_line,
-            HttpVersion(p.Get().http_major, p.Get().http_minor),
-            std::move(headers),
-            std::move(body)
+        static_cast<std::uint16_t>(p.Get().status_code), // We know this is fine from http_parser.h
+        status_line,
+        HttpVersion(p.Get().http_major, p.Get().http_minor),
+        std::move(headers),
+        std::move(body)
     };
 
     // TODO
