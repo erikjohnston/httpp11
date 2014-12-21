@@ -34,5 +34,15 @@ TEST_CASE("HTTP Response Parser", "[http]") {
         REQUIRE(response.status == 200);
         REQUIRE(to_str(response.status_line) == "OK");
         REQUIRE(to_str(response.body) == "Hello");
+
+        REQUIRE(response.headers.count("Content-Length") == 1);
+        REQUIRE(response.headers.count("content-length") == 1);
+
+        auto length = response.headers.find("Content-Length");
+        REQUIRE(length != response.headers.end());
+        REQUIRE(to_str(length->second) == "5");
+
+        REQUIRE(response.headers.count("Content-Type") == 1);
+        REQUIRE(response.headers.size() == 2);
     };
 }

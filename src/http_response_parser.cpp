@@ -26,6 +26,7 @@ HttpResponseParser::HttpResponseParser()
     settings->status = bind_data_fn(this, &HttpResponseParser::on_status);
     settings->header_field = bind_data_fn(this, &HttpResponseParser::on_h_field);
     settings->header_value = bind_data_fn(this, &HttpResponseParser::on_h_value);
+    settings->headers_complete = bind_fn(this, &HttpResponseParser::on_headers_complete);
     settings->body = bind_data_fn(this, &HttpResponseParser::on_body);
     settings->message_complete = bind_fn(this, &HttpResponseParser::on_message_complete);
 
@@ -84,6 +85,14 @@ bool HttpResponseParser::on_body(httpp11::http_parser&, std::vector<char> data) 
 
 bool HttpResponseParser::on_status(httpp11::http_parser&, std::vector<char> data) {
     std::copy(data.begin(), data.end(), std::back_inserter(status_line));
+    return 0;
+}
+
+bool HttpResponseParser::on_headers_complete(httpp11::http_parser& p) {
+    headers.insert({std::move(header_field), std::move(header_value)});
+
+    headerState = HeaderState::FIELD;
+
     return 0;
 }
 

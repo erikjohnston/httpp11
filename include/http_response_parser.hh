@@ -66,6 +66,7 @@ public:
     // http11 callbacks
     bool on_h_field(httpp11::http_parser&, std::vector<char>);
     bool on_h_value(httpp11::http_parser&, std::vector<char>);
+    bool on_headers_complete(httpp11::http_parser&);
     bool on_body(httpp11::http_parser&, std::vector<char>);
     bool on_status(httpp11::http_parser&, std::vector<char>);
     bool on_message_complete(httpp11::http_parser&);
