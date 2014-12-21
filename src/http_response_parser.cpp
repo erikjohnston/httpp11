@@ -33,17 +33,10 @@ HttpResponseParser::HttpResponseParser()
 
 }
 
-Deferred<> HttpResponseParser::on_data(std::vector<char>&& data) {
-    httpp11::http_parser_execute(*parser, *settings, data);
-    // TODO: Exception.
-
-    return Deferred<>::make_succeeded();
-}
-
-void HttpResponseParser::on_error(Error const&, bool fatal) {
-    // TODO
-    if (fatal) {
-        on_close();
+void HttpResponseParser::on_data(std::vector<char>&& data) {
+    if (data.size() > 0) {
+        httpp11::http_parser_execute(*parser, *settings, data);
+        // TODO: Exception.
     }
 }
 

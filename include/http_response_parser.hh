@@ -2,7 +2,6 @@
 
 #include "deferred.h"
 #include "httpp11.hh"
-#include "sink.hh"
 
 #include <cstdint>
 #include <functional>
@@ -54,15 +53,14 @@ struct HttpResponse {
 };
 
 
-class HttpResponseParser : public Sink<std::vector<char>> {
+class HttpResponseParser{
 public:
     HttpResponseParser();
 
     virtual ~HttpResponseParser() {}
 
     // Callbacks from the TCP source.
-    Deferred<> on_data(std::vector<char>&&);
-    void on_error(Error const&, bool fatal);
+    void on_data(std::vector<char>&&);
     void on_close();
 
     // http11 callbacks
