@@ -53,33 +53,32 @@ struct HttpResponse {
 };
 
 
-class HttpResponseParser {
+class HttpParser {
 public:
-    HttpResponseParser();
+    HttpParser(httpp11::http_parser_type);
 
-    virtual ~HttpResponseParser();
+    virtual ~HttpParser();
 
     // Callbacks from the TCP source.
     void on_data(std::vector<char>&&);
     void on_close();
 
     // http11 callbacks
-    bool on_message_begin(httpp11::http_parser&);
+    virtual bool on_message_begin(httpp11::http_parser&);
+    virtual bool on_url(httpp11::http_parser&, std::vector<char>) { return 0; }
+    virtual bool on_status(httpp11::http_parser&, std::vector<char>) { return 0; }
     bool on_h_field(httpp11::http_parser&, std::vector<char>);
     bool on_h_value(httpp11::http_parser&, std::vector<char>);
     bool on_headers_complete(httpp11::http_parser&);
     bool on_body(httpp11::http_parser&, std::vector<char>);
-    bool on_status(httpp11::http_parser&, std::vector<char>);
-    bool on_message_complete(httpp11::http_parser&);
 
-    std::function<void(HttpResponse&&)> callback;
+    virtual bool on_message_complete(httpp11::http_parser&) = 0;
 
-private:
+protected:
     httpp11::unique_http_parser parser;
     httpp11::unique_http_parser_settings settings;
 
     std::vector<char> body;
-    std::vector<char> reason_phrase;
 
     enum class HeaderState {FIELD, VALUE};
     HeaderState headerState = HeaderState::FIELD;
@@ -88,4 +87,19 @@ private:
     std::vector<char> header_value;
 
     HttpHeaders headers;
+};
+
+class HttpResponseParser : public HttpParser {
+public:
+    HttpResponseParser();
+    virtual ~HttpResponseParser();
+
+    virtual bool on_message_begin(httpp11::http_parser&);
+    virtual bool on_status(httpp11::http_parser&, std::vector<char>);
+
+    virtual bool on_message_complete(httpp11::http_parser&);
+
+    std::function<void(HttpResponse&&)> callback;
+protected:
+    std::vector<char> reason_phrase;
 };
