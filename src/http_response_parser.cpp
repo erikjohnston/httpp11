@@ -7,7 +7,7 @@
 
 static httpp11::http_data_cb bind_data_fn(
     HttpParser* p,
-    bool(HttpParser::* fn)(httpp11::http_parser&, std::vector<char>)
+    bool(HttpParser::* fn)(httpp11::http_parser&, BufferView const&)
 ) {
     return std::bind(std::mem_fn(fn), p, std::placeholders::_1, std::placeholders::_2);
 }
@@ -47,7 +47,7 @@ void HttpParser::on_close() {
     // TODO
 
     // Signal EOF to http11
-    httpp11::http_parser_execute(*parser, *settings, std::vector<char>());
+    httpp11::http_parser_execute(*parser, *settings, BufferView(nullptr, 0));
 }
 
 bool HttpParser::on_message_begin(httpp11::http_parser&) {
@@ -61,7 +61,7 @@ bool HttpParser::on_message_begin(httpp11::http_parser&) {
 }
 
 
-bool HttpParser::on_h_field(httpp11::http_parser&, std::vector<char> data) {
+bool HttpParser::on_h_field(httpp11::http_parser&, BufferView const& data) {
     if (headerState == HeaderState::FIELD) {
         std::copy(data.begin(), data.end(), std::back_inserter(header_field));
     } else {
@@ -75,18 +75,18 @@ bool HttpParser::on_h_field(httpp11::http_parser&, std::vector<char> data) {
     return 0;
 }
 
-bool HttpParser::on_h_value(httpp11::http_parser&, std::vector<char> data) {
+bool HttpParser::on_h_value(httpp11::http_parser&, BufferView const& data) {
     if (headerState == HeaderState::VALUE) {
         std::copy(data.begin(), data.end(), std::back_inserter(header_value));
     } else {
         headerState = HeaderState::VALUE;
-        header_value = std::move(data);
+        header_value = std::vector<char>(data.begin(), data.end());
     }
 
     return 0;
 }
 
-bool HttpParser::on_body(httpp11::http_parser&, std::vector<char> data) {
+bool HttpParser::on_body(httpp11::http_parser&, BufferView const& data) {
     std::copy(data.begin(), data.end(), std::back_inserter(body));
     return 0;
 }
@@ -109,7 +109,7 @@ bool HttpResponseParser::on_message_begin(httpp11::http_parser& p) {
     return HttpParser::on_message_begin(p);
 }
 
-bool HttpResponseParser::on_status(httpp11::http_parser&, std::vector<char> data) {
+bool HttpResponseParser::on_status(httpp11::http_parser&, BufferView const& data) {
     std::copy(data.begin(), data.end(), std::back_inserter(reason_phrase));
     return 0;
 }
@@ -137,7 +137,7 @@ bool HttpRequestParser::on_message_begin(httpp11::http_parser& p) {
     return HttpParser::on_message_begin(p);
 }
 
-bool HttpRequestParser::on_url(httpp11::http_parser&, std::vector<char> data) {
+bool HttpRequestParser::on_url(httpp11::http_parser&, BufferView const& data) {
     std::copy(data.begin(), data.end(), std::back_inserter(url));
     return 0;
 }

@@ -2,9 +2,10 @@
 
 #include "http_parser.h"
 
+#include "buffer_view.hh"
+
 #include <functional>
 #include <memory>
-#include <vector>
 #include <system_error>
 
 namespace httpp11 {
@@ -27,7 +28,7 @@ namespace httpp11 {
 
 
     // Callbacks
-    using http_data_cb = std::function<bool(http_parser&, std::vector<char>)>;
+    using http_data_cb = std::function<bool(http_parser&, BufferView const&)>;
     using http_cb = std::function<bool(http_parser&)>;
 
     struct HttpContext;
@@ -82,7 +83,7 @@ namespace httpp11 {
     // library functions
     unique_http_parser http_parser_init(http_parser_type);
 
-    void http_parser_execute(http_parser&, http_parser_settings&, std::vector<char> const&);
+    void http_parser_execute(http_parser&, http_parser_settings&, BufferView const&);
 
     bool http_should_keep_alive(http_parser const& parser);
 

@@ -34,7 +34,8 @@ httpp11::unique_http_parser httpp11::http_parser_init(httpp11::http_parser_type 
 }
 
 void httpp11::http_parser_execute(httpp11::http_parser& parser, httpp11::http_parser_settings& settings,
-        std::vector<char> const& data) {
+    BufferView const& data)
+{
     settings.setup_callbacks(parser);
 
     auto nparsed = ::http_parser_execute(&parser.Get(), &settings.Get(), data.data(), data.size());
@@ -75,8 +76,7 @@ int http_callback_templ(::http_parser* parser) {
 template<httpp11::http_data_cb (httpp11::http_parser_settings::* func)>
 int http_data_callback_templ(::http_parser* parser, const char* c, ::size_t len) {
     auto* context = static_cast<httpp11::HttpContext*>(parser->data);
-    std::vector<char> data(c, c + len);
-    return (context->settings.*func)(context->parser, data) ? 1 : 0;
+    return (context->settings.*func)(context->parser, BufferView(c, len)) ? 1 : 0;
 }
 
 template <httpp11::http_cb (httpp11::http_parser_settings::* funcpp)>

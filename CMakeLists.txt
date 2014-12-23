@@ -35,7 +35,7 @@ set(HTTP_PARSER_INCLUDE_DIR ${install_dir}/include)
 include_directories(${HTTP_PARSER_INCLUDE_DIR})
 
 include_directories(include/)
-add_library(httpp11 src/httpp11.cpp src/http_response_parser.cpp src/deferred.cpp)
+add_library(httpp11 src/httpp11.cpp src/http_response_parser.cpp src/deferred.cpp src/buffer_view.cpp)
 target_link_libraries(httpp11 http-parser)
 
 add_executable(myapp src/main.cpp)

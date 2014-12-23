@@ -1,5 +1,6 @@
 #pragma once
 
+#include "buffer_view.hh"
 #include "deferred.h"
 #include "httpp11.hh"
 
@@ -75,12 +76,12 @@ public:
 
     // http11 callbacks
     virtual bool on_message_begin(httpp11::http_parser&);
-    virtual bool on_url(httpp11::http_parser&, std::vector<char>) { return 0; }
-    virtual bool on_status(httpp11::http_parser&, std::vector<char>) { return 0; }
-    bool on_h_field(httpp11::http_parser&, std::vector<char>);
-    bool on_h_value(httpp11::http_parser&, std::vector<char>);
+    virtual bool on_url(httpp11::http_parser&, BufferView const&) { return 0; }
+    virtual bool on_status(httpp11::http_parser&, BufferView const&) { return 0; }
+    bool on_h_field(httpp11::http_parser&, BufferView const&);
+    bool on_h_value(httpp11::http_parser&, BufferView const&);
     bool on_headers_complete(httpp11::http_parser&);
-    bool on_body(httpp11::http_parser&, std::vector<char>);
+    bool on_body(httpp11::http_parser&, BufferView const&);
 
     virtual bool on_message_complete(httpp11::http_parser&) = 0;
 
@@ -106,7 +107,7 @@ public:
     virtual ~HttpResponseParser();
 
     virtual bool on_message_begin(httpp11::http_parser&);
-    virtual bool on_status(httpp11::http_parser&, std::vector<char>);
+    virtual bool on_status(httpp11::http_parser&, BufferView const&);
 
     virtual bool on_message_complete(httpp11::http_parser&);
 
@@ -122,7 +123,7 @@ public:
     virtual ~HttpRequestParser();
 
     virtual bool on_message_begin(httpp11::http_parser&);
-    virtual bool on_url(httpp11::http_parser&, std::vector<char>);
+    virtual bool on_url(httpp11::http_parser&, BufferView const&);
 
     virtual bool on_message_complete(httpp11::http_parser&);
 

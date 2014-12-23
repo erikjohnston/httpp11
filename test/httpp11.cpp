@@ -23,11 +23,11 @@ TEST_CASE("Test parsing GET response", "[http11]") {
     settings->message_complete = message_complete_cb;
 
 
-    CallTrackerReturn<bool, false, h::http_parser&, std::vector<char>> status_cb;
-    CallTrackerReturn<bool, false, h::http_parser&, std::vector<char>> url_cb;
-    CallTrackerReturn<bool, false, h::http_parser&, std::vector<char>> header_field_cb;
-    CallTrackerReturn<bool, false, h::http_parser&, std::vector<char>> header_value_cb;
-    CallTrackerReturn<bool, false, h::http_parser&, std::vector<char>> body_cb;
+    CallTrackerReturn<bool, false, h::http_parser&, BufferView const&> status_cb;
+    CallTrackerReturn<bool, false, h::http_parser&, BufferView const&> url_cb;
+    CallTrackerReturn<bool, false, h::http_parser&, BufferView const&> header_field_cb;
+    CallTrackerReturn<bool, false, h::http_parser&, BufferView const&> header_value_cb;
+    CallTrackerReturn<bool, false, h::http_parser&, BufferView const&> body_cb;
 
     settings->status = status_cb;
     settings->url = url_cb;
