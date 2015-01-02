@@ -8,11 +8,12 @@
 
 
 TEST_CASE("HTTP Response Parser", "[http]") {
-    HttpResponseParser parser;
+    httpp11::Parser parser(httpp11::ParserType::Response);
+    HttpResponseCollator settings;
 
     bool has_fired = false;
     HttpResponse response;
-    parser.callback = [&has_fired, &response] (HttpResponse&& r) mutable {
+    settings.callback = [&has_fired, &response] (HttpResponse&& r) mutable {
         has_fired = true;
         response = std::move(r);
     };
@@ -26,7 +27,7 @@ TEST_CASE("HTTP Response Parser", "[http]") {
                 "Hello"
         ;
 
-        parser.on_data(to_vec(response_str));
+        httpp11::http_parser_execute(parser, settings, response_str);
 
         REQUIRE(has_fired == true);
         REQUIRE(response.status == 200);
@@ -57,7 +58,7 @@ TEST_CASE("HTTP Response Parser", "[http]") {
                 "Hi!"
             ;
 
-            parser.on_data(to_vec(response_str));
+            httpp11::http_parser_execute(parser, settings, response_str);
 
             REQUIRE(has_fired == true);
             REQUIRE(response.status == 400);

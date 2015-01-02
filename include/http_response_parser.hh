@@ -1,7 +1,6 @@
 #pragma once
 
 #include "buffer_view.hh"
-#include "deferred.h"
 #include "httpp11.hh"
 
 #include <cstdint>
@@ -64,70 +63,64 @@ struct HttpRequest : public HttpMessage {
 
 
 
-class HttpParser {
+class HttpMessageCollator : public httpp11::Settings {
 public:
-    HttpParser(httpp11::http_parser_type);
+    HttpMessageCollator();
 
-    virtual ~HttpParser();
-
-    // Callbacks from the TCP source.
-    void on_data(std::vector<char>&&);
-    void on_close();
-
-    // http11 callbacks
-    virtual bool on_message_begin(httpp11::http_parser&);
-    virtual bool on_url(httpp11::http_parser&, BufferView const&) { return 0; }
-    virtual bool on_status(httpp11::http_parser&, BufferView const&) { return 0; }
-    bool on_h_field(httpp11::http_parser&, BufferView const&);
-    bool on_h_value(httpp11::http_parser&, BufferView const&);
-    bool on_headers_complete(httpp11::http_parser&);
-    bool on_body(httpp11::http_parser&, BufferView const&);
-
-    virtual bool on_message_complete(httpp11::http_parser&) = 0;
+    virtual ~HttpMessageCollator();
 
 protected:
-    httpp11::unique_http_parser parser;
-    httpp11::unique_http_parser_settings settings;
+    // http11 callbacks
+    virtual bool on_message_begin(httpp11::Parser&);
+    virtual bool on_url(httpp11::Parser&, BufferView const&) { return 0; }
+    virtual bool on_status(httpp11::Parser&, BufferView const&) { return 0; }
+    bool on_h_field(httpp11::Parser&, BufferView const&);
+    bool on_h_value(httpp11::Parser&, BufferView const&);
+    bool on_headers_complete(httpp11::Parser&);
+    bool on_body(httpp11::Parser&, BufferView const&);
 
-    std::vector<char> body;
+    virtual bool on_message_complete(httpp11::Parser&) = 0;
 
+    std::vector<char> body_buffer;
+
+    HttpHeaders headers;
+
+private:
     enum class HeaderState {FIELD, VALUE};
     HeaderState headerState = HeaderState::FIELD;
 
-    std::string header_field;
-    std::vector<char> header_value;
-
-    HttpHeaders headers;
+    std::string header_field_buffer;
+    std::vector<char> header_value_buffer;
 };
 
 
-class HttpResponseParser : public HttpParser {
+class HttpResponseCollator : public HttpMessageCollator {
 public:
-    HttpResponseParser();
-    virtual ~HttpResponseParser();
-
-    virtual bool on_message_begin(httpp11::http_parser&);
-    virtual bool on_status(httpp11::http_parser&, BufferView const&);
-
-    virtual bool on_message_complete(httpp11::http_parser&);
+    HttpResponseCollator();
+    virtual ~HttpResponseCollator();
 
     std::function<void(HttpResponse&&)> callback;
 protected:
+    virtual bool on_message_begin(httpp11::Parser&);
+    virtual bool on_status(httpp11::Parser&, BufferView const&);
+
+    virtual bool on_message_complete(httpp11::Parser&);
+
     std::vector<char> reason_phrase;
 };
 
 
-class HttpRequestParser : public HttpParser {
+class HttpRequestCollator : public HttpMessageCollator {
 public:
-    HttpRequestParser();
-    virtual ~HttpRequestParser();
-
-    virtual bool on_message_begin(httpp11::http_parser&);
-    virtual bool on_url(httpp11::http_parser&, BufferView const&);
-
-    virtual bool on_message_complete(httpp11::http_parser&);
+    HttpRequestCollator();
+    virtual ~HttpRequestCollator();
 
     std::function<void(HttpRequest&&)> callback;
 protected:
+    virtual bool on_message_begin(httpp11::Parser&);
+    virtual bool on_url(httpp11::Parser&, BufferView const&);
+
+    virtual bool on_message_complete(httpp11::Parser&);
+
     std::vector<char> url;
 };

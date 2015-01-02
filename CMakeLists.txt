@@ -15,7 +15,7 @@ ExternalProject_Add (
 #    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/externals/http_parser
 #    BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/build/http_parser
     UPDATE_COMMAND ""
-    INSTALL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/externals/http_parser
+    INSTALL_DIR ${CMAKE_SOURCE_DIR}/externals/http_parser
     BUILD_IN_SOURCE 1
 #    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/http-parser
     CONFIGURE_COMMAND cmake -E make_directory <INSTALL_DIR>/lib 
@@ -35,11 +35,8 @@ set(HTTP_PARSER_INCLUDE_DIR ${install_dir}/include)
 include_directories(${HTTP_PARSER_INCLUDE_DIR})
 
 include_directories(include/)
-add_library(httpp11 src/httpp11.cpp src/http_response_parser.cpp src/deferred.cpp src/buffer_view.cpp)
-target_link_libraries(httpp11 http-parser)
-
-add_executable(myapp src/main.cpp)
-target_link_libraries(myapp httpp11)
+add_library(httplib src/httpp11.cpp src/http_response_parser.cpp src/buffer_view.cpp)
+target_link_libraries(httplib http-parser)
 
 include_directories(SYSTEM ${HTTP_PARSER_INCLUDE_DIR})
 
@@ -47,3 +44,16 @@ add_subdirectory(test)
 
 enable_testing ()
 add_test (NAME MyTest COMMAND Test)
+
+cmake_minimum_required(VERSION 3.0)
+
+add_library(uvpp INTERFACE)
+target_include_directories(uvpp INTERFACE 
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+
+install(TARGETS httplib EXPORT httplib ARCHIVE DESTINATION lib)
+install(EXPORT httplib DESTINATION lib/cmake/httplib)
+install(DIRECTORY include DESTINATION include)
+
