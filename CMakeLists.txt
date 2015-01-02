@@ -32,11 +32,14 @@ set_property(TARGET http-parser PROPERTY IMPORTED_LOCATION ${install_dir}/lib/li
 add_dependencies(http-parser http-parser-proj)
 
 set(HTTP_PARSER_INCLUDE_DIR ${install_dir}/include)
-include_directories(${HTTP_PARSER_INCLUDE_DIR})
 
-include_directories(include/)
-add_library(httplib src/httpp11.cpp src/collator.cpp src/buffer_view.cpp)
-target_link_libraries(httplib http-parser)
+add_library(httpp11 src/httpp11.cpp src/collator.cpp src/buffer_view.cpp)
+target_include_directories(httpp11 PRIVATE ${HTTP_PARSER_INCLUDE_DIR})
+target_include_directories(httpp11 PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(httpp11 http-parser)
 
 include_directories(SYSTEM ${HTTP_PARSER_INCLUDE_DIR})
 
@@ -47,13 +50,7 @@ add_test (NAME MyTest COMMAND Test)
 
 cmake_minimum_required(VERSION 3.0)
 
-add_library(uvpp INTERFACE)
-target_include_directories(uvpp INTERFACE 
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
-    $<INSTALL_INTERFACE:include>
-)
-
-install(TARGETS httplib EXPORT httplib ARCHIVE DESTINATION lib)
-install(EXPORT httplib DESTINATION lib/cmake/httplib)
+install(TARGETS httpp11 EXPORT httpp11 ARCHIVE DESTINATION lib)
+install(EXPORT httpp11 DESTINATION lib/cmake/httpp11)
 install(DIRECTORY include DESTINATION include)
 
