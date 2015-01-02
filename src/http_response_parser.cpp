@@ -128,7 +128,7 @@ bool HttpRequestCollator::on_url(httpp11::Parser&, BufferView const& data) {
 
 bool HttpRequestCollator::on_message_complete(httpp11::Parser& p) {
     HttpRequest request;
-    request.method = httpp11::http_method_str(p);
+    request.method = httpp11::method_str(p);
     request.url = url;
     request.version = HttpVersion(p.Get().http_major, p.Get().http_minor);
     request.headers = std::move(headers);

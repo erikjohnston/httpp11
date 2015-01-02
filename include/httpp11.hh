@@ -60,16 +60,16 @@ namespace httpp11 {
     };
 
 
-    Error http_parser_execute(Parser&, Settings&, BufferView const&);
+    Error execute(Parser&, Settings&, BufferView const&);
 
-    bool http_should_keep_alive(Parser const& parser);
+    bool should_keep_alive(Parser const& parser);
 
-    void http_parser_pause(Parser& parser, bool paused);
+    void pause(Parser& parser, bool paused);
 
-    bool http_body_is_final(Parser const& parser);
+    bool body_is_final(Parser const& parser);
 
-    std::string http_method_str(Parser const& parser);
-    std::string http_method_str(enum http_method m);
+    std::string method_str(Parser const& parser);
+    std::string method_str(enum http_method m);
 
     std::error_category const& httpp11_error_category();
 

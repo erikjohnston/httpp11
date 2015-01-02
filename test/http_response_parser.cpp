@@ -27,7 +27,7 @@ TEST_CASE("HTTP Response Parser", "[http]") {
                 "Hello"
         ;
 
-        httpp11::http_parser_execute(parser, settings, response_str);
+        httpp11::execute(parser, settings, response_str);
 
         REQUIRE(has_fired == true);
         REQUIRE(response.status == 200);
@@ -58,7 +58,7 @@ TEST_CASE("HTTP Response Parser", "[http]") {
                 "Hi!"
             ;
 
-            httpp11::http_parser_execute(parser, settings, response_str);
+            httpp11::execute(parser, settings, response_str);
 
             REQUIRE(has_fired == true);
             REQUIRE(response.status == 400);

@@ -68,7 +68,7 @@ Parser::Parser(ParserType type) {
 
 
 
-Error httpp11::http_parser_execute(Parser& parser, Settings& settings, BufferView const& data) {
+Error httpp11::execute(Parser& parser, Settings& settings, BufferView const& data) {
     parser.settings = &settings;
     auto s = ::http_parser_execute(&parser.Get(), &settings.Get(), data.data(), data.size());
     parser.settings = nullptr;
@@ -80,24 +80,24 @@ Error httpp11::http_parser_execute(Parser& parser, Settings& settings, BufferVie
     }
 }
 
-bool httpp11::http_should_keep_alive(Parser const& parser) {
+bool httpp11::should_keep_alive(Parser const& parser) {
     return ::http_should_keep_alive(&parser.Get()) > 0;
 }
 
-void httpp11::http_parser_pause(Parser& parser, bool paused) {
+void httpp11::pause(Parser& parser, bool paused) {
     ::http_parser_pause(&parser.Get(), paused ? 1 : 0);
 }
 
-bool httpp11::http_body_is_final(Parser const& parser) {
+bool httpp11::body_is_final(Parser const& parser) {
     return ::http_body_is_final(&parser.Get()) > 0;
 }
 
 
 
-std::string httpp11::http_method_str(Parser const& parser) {
-    return httpp11::http_method_str(static_cast<http_method>(parser.Get().method));
+std::string httpp11::method_str(Parser const& parser) {
+    return method_str(static_cast<http_method>(parser.Get().method));
 }
 
-std::string httpp11::http_method_str(enum http_method m) {
+std::string httpp11::method_str(enum http_method m) {
     return ::http_method_str(m);
 }

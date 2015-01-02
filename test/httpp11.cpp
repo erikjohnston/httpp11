@@ -38,7 +38,7 @@ TEST_CASE("Test parsing GET response", "[http11]") {
     SECTION("Check one big chunk") {
         std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 5\r\n\r\nHello";
 
-        h::http_parser_execute(parser, settings, to_vec(response));
+        h::execute(parser, settings, to_vec(response));
 
         REQUIRE(message_begin_cb.number_of_calls() == 1);
         REQUIRE(status_cb.number_of_calls() > 0);
@@ -78,7 +78,7 @@ TEST_CASE("Test parsing GET response", "[http11]") {
         };
 
         for (auto& entry : chunks) {
-            h::http_parser_execute(parser, settings, to_vec(entry.first));
+            h::execute(parser, settings, to_vec(entry.first));
             entry.second();
         }
 
