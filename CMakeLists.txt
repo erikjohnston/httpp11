@@ -11,13 +11,9 @@ ExternalProject_Add (
     http-parser-proj
     GIT_REPOSITORY "git@github.com:joyent/http-parser.git"
     GIT_TAG ${http-parser-version}
-#    DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/download/http_parser
-#    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/externals/http_parser
-#    BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/build/http_parser
     UPDATE_COMMAND ""
     INSTALL_DIR ${CMAKE_SOURCE_DIR}/externals/http_parser
     BUILD_IN_SOURCE 1
-#    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/http-parser
     CONFIGURE_COMMAND cmake -E make_directory <INSTALL_DIR>/lib 
         COMMAND cmake -E make_directory <INSTALL_DIR>/include
     BUILD_COMMAND make package
