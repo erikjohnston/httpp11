@@ -1,52 +1,44 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.1)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 set(http-parser-version "v2.3")
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Weverything -Wno-c++98-compat -Wno-padded -Wno-exit-time-destructors -Wno-global-constructors")
 
-include(ExternalProject)
+find_package(HttpParser REQUIRED)
+include_directories(SYSTEM ${HTTPPARSER_INCLUDE_DIRS})
+include_directories(include)
 
-ExternalProject_Add (
-    http-parser-proj
-    GIT_REPOSITORY "git@github.com:joyent/http-parser.git"
-    GIT_TAG ${http-parser-version}
-    UPDATE_COMMAND ""
-    INSTALL_DIR ${CMAKE_SOURCE_DIR}/externals/http_parser
-    BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND cmake -E make_directory <INSTALL_DIR>/lib 
-        COMMAND cmake -E make_directory <INSTALL_DIR>/include
-    BUILD_COMMAND make package
-    INSTALL_COMMAND cmake -E copy libhttp_parser.a <INSTALL_DIR>/lib/
-        COMMAND cmake -E copy http_parser.h <INSTALL_DIR>/include/
-)
+add_library(httpp11Objects OBJECT src/httpp11.cpp src/collator.cpp src/buffer_view.cpp)
+add_dependencies(httpp11Objects ${HTTPPARSER_DEPENDENCY})
+target_compile_options(httpp11Objects PRIVATE "-std=c++11" "-fPIC")
 
-ExternalProject_Get_Property(http-parser-proj install_dir)
 
-add_library(http-parser STATIC IMPORTED)
-set_property(TARGET http-parser PROPERTY IMPORTED_LOCATION ${install_dir}/lib/libhttp_parser.a)
-add_dependencies(http-parser http-parser-proj)
-
-set(HTTP_PARSER_INCLUDE_DIR ${install_dir}/include)
-
-add_library(httpp11 src/httpp11.cpp src/collator.cpp src/buffer_view.cpp)
-target_include_directories(httpp11 PRIVATE ${HTTP_PARSER_INCLUDE_DIR})
+add_library(httpp11 SHARED $<TARGET_OBJECTS:httpp11Objects>)
+target_link_libraries(httpp11 HttpParser)
 target_include_directories(httpp11 PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
-target_link_libraries(httpp11 http-parser)
+target_compile_options(httpp11 PUBLIC "-std=c++11")
 
-include_directories(SYSTEM ${HTTP_PARSER_INCLUDE_DIR})
+
+add_library(httpp11Static STATIC $<TARGET_OBJECTS:httpp11Objects>)
+target_link_libraries(httpp11Static HttpParser)
+target_include_directories(httpp11Static PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_compile_options(httpp11Static PUBLIC "-std=c++11")
+
 
 add_subdirectory(test)
 
 enable_testing ()
 add_test (NAME MyTest COMMAND Test)
 
-cmake_minimum_required(VERSION 3.0)
-
-install(TARGETS httpp11 EXPORT httpp11 ARCHIVE DESTINATION lib)
+install(TARGETS httpp11 EXPORT httpp11 ARCHIVE DESTINATION lib LIBRARY DESTINATION lib)
 install(EXPORT httpp11 DESTINATION lib/cmake/httpp11)
 install(DIRECTORY include DESTINATION include)
 
