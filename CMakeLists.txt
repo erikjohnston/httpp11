@@ -35,7 +35,7 @@ set(HTTP_PARSER_INCLUDE_DIR ${install_dir}/include)
 include_directories(${HTTP_PARSER_INCLUDE_DIR})
 
 include_directories(include/)
-add_library(httplib src/httpp11.cpp src/http_response_parser.cpp src/buffer_view.cpp)
+add_library(httplib src/httpp11.cpp src/collator.cpp src/buffer_view.cpp)
 target_link_libraries(httplib http-parser)
 
 include_directories(SYSTEM ${HTTP_PARSER_INCLUDE_DIR})

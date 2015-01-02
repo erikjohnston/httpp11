@@ -1,5 +1,8 @@
 #include "buffer_view.hh"
 
+using namespace httpp11;
+
+
 BufferView::BufferView(char const* data, std::size_t len) : data_(data), length_(len) {}
 
 char const* BufferView::data() const { return data_; }
