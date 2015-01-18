@@ -35,7 +35,12 @@ template<SettingsEventCallback cb_ptr>
 static ::http_cb create_event_callback() {
     return [] (http_parser* parser) -> int {
         Parser* p = reinterpret_cast<Parser*>(parser->data);
-        return (p->settings->*cb_ptr)(*p);
+        auto cb = p->settings->*cb_ptr;
+        if (cb) {
+            return cb(*p);
+        } else {
+            return 0;
+        }
     };
 }
 
@@ -44,7 +49,12 @@ template<SettingsDataCallback cb_ptr>
 static ::http_data_cb create_data_callback() {
     return [] (http_parser* parser, const char *at, size_t length) -> int {
         Parser* p = reinterpret_cast<Parser*>(parser->data);
-        return (p->settings->*cb_ptr)(*p, BufferView(at, length));
+        auto cb = p->settings->*cb_ptr;
+        if (cb) {
+            return cb(*p, BufferView(at, length));
+        } else {
+            return 0;
+        }
     };
 }
 
