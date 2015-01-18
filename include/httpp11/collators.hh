@@ -75,6 +75,7 @@ namespace httpp11 {
     class HttpMessageCollator : public httpp11::Settings {
     public:
         HttpMessageCollator();
+        HttpMessageCollator(HttpMessageCollator const&) = delete;
 
         virtual ~HttpMessageCollator();
 
